@@ -58,10 +58,10 @@ The parameter **refresh** adjusts in what interval (seconds) changes of the robo
 		"email": "YourEmail",
 		"password": "YourPassword",
 		"refresh": "120",
-		<!-- "extraCareNavigation": true -->
 	}
 ]
 ```
+<!-- "extraCareNavigation": true -->
 
 ## Tested robots
 
