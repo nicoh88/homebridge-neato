@@ -73,3 +73,7 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 
 ### 0.1.0
 * (nicoh88) initial release
+
+### 0.1.1
+* (nicoh88) release for npmjs
+

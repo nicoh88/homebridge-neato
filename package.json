@@ -1,6 +1,6 @@
 {
   "name": "homebridge-vorwerk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Vorwerk Kobold VR200 vacuum robot plugin for homebridge.",
   "license": "MIT",
   "keywords": [
@@ -21,7 +21,7 @@
     "url": "git://github.com/nicoh88/homebridge-vorwerk.git"
   },
   "dependencies": {
-    "node-kobold": ">=0.1.0",
+    "node-kobold": ">=0.1.2",
     "debug": "^2.2.0"
   }
 }
