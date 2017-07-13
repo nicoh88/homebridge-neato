@@ -1,26 +1,27 @@
 {
-  "name": "homebridge-neato",
-  "version": "0.4.1",
-  "description": "A Neato vacuum robot plugin for homebridge.",
+  "name": "homebridge-vorwerk",
+  "version": "0.1.0",
+  "description": "A Vorwerk Kobold VR200 vacuum robot plugin for homebridge.",
   "license": "MIT",
   "keywords": [
     "homebridge-plugin",
-    "neato",
-    "botvac"
+    "vorwerk",
+    "kobold",
+    "vr200"
   ],
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
   },
   "author": {
-    "name": "Arne Blumentritt"
+    "name": "Nico Hartung"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/naofireblade/homebridge-neato.git"
+    "url": "git://github.com/nicoh88/homebridge-vorwerk.git"
   },
   "dependencies": {
-    "node-botvac": ">=0.1.5",
+    "node-kobold": ">=0.1.0",
     "debug": "^2.2.0"
   }
 }

@@ -9,17 +9,17 @@ var inherits = require('util').inherits,
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
-	homebridge.registerPlatform("homebridge-neato", "NeatoVacuumRobot", NeatoVacuumRobotPlatform);
+	homebridge.registerPlatform("homebridge-neato", "VorwerkVacuumRobot", VorwerkVacuumRobotPlatform);
 }
 
-function NeatoVacuumRobotPlatform(log, config) {
+function VorwerkVacuumRobotPlatform(log, config) {
 	this.log = log;
 	this.serial = "1-3-3-7";
 	this.email = config['email'];
 	this.password = config['password'];
 
-	this.careNavigation = ('extraCareNavigation' in config && config['extraCareNavigation'] ? 2 : 1);
-	debug("Extra Care Navigation: " + this.careNavigation);
+	// this.careNavigation = ('extraCareNavigation' in config && config['extraCareNavigation'] ? 2 : 1);
+	// debug("Extra Care Navigation: " + this.careNavigation);
 
 	// default off
 	this.refresh = ('refresh' in config ? parseInt(config['refresh']) : 0);
@@ -29,7 +29,7 @@ function NeatoVacuumRobotPlatform(log, config) {
 	this.refresh = (this.refresh > 0 && this.refresh < 60) ? 60 : this.refresh;
 }
 
-NeatoVacuumRobotPlatform.prototype = {
+VorwerkVacuumRobotPlatform.prototype = {
 	accessories: function(callback) {
 		this.accessories = [];
 
@@ -37,7 +37,7 @@ NeatoVacuumRobotPlatform.prototype = {
 		this.robots = this.getRobots(function () {
 			for (var i = 0; i < that.robots.length; i++) {
 				that.log("Found robot #" + (i+1) + ": " + that.robots[i].name);
-				var robotAccessory = new NeatoVacuumRobotAccessory(that.robots[i], that);
+				var robotAccessory = new VorwerkVacuumRobotAccessory(that.robots[i], that);
 				that.accessories.push(robotAccessory);
 			}
 			callback(that.accessories);
@@ -77,7 +77,7 @@ NeatoVacuumRobotPlatform.prototype = {
 	}
 }
 
-function NeatoVacuumRobotAccessory(robot, platform) {
+function VorwerkVacuumRobotAccessory(robot, platform) {
 	this.platform = platform;
 	this.log = platform.log;
 	this.refresh = platform.refresh;
@@ -97,7 +97,7 @@ function NeatoVacuumRobotAccessory(robot, platform) {
 }
 
 
-NeatoVacuumRobotAccessory.prototype = {
+VorwerkVacuumRobotAccessory.prototype = {
 	identify: function (callback) {
 		let that = this;
 		this.updateRobot(function() {
