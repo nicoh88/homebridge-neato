@@ -1,7 +1,7 @@
 "use strict";
 var inherits = require('util').inherits,
-	debug = require('debug')('homebridge-neato'),
-	botvac = require('node-botvac'),
+	debug = require('debug')('homebridge-vorwerk'),
+	kobold = require('node-kobold'),
 
 	Service,
 	Characteristic
@@ -9,7 +9,7 @@ var inherits = require('util').inherits,
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
-	homebridge.registerPlatform("homebridge-neato", "VorwerkVacuumRobot", VorwerkVacuumRobotPlatform);
+	homebridge.registerPlatform("homebridge-vorwerk", "VorwerkVacuumRobot", VorwerkVacuumRobotPlatform);
 }
 
 function VorwerkVacuumRobotPlatform(log, config) {
@@ -46,19 +46,19 @@ VorwerkVacuumRobotPlatform.prototype = {
 
 	getRobots: function(callback) {
 		debug("Get all robots");
-		let client = new botvac.Client();
+		let client = new kobold.Client();
 		let that = this;
 		client.authorize(this.email, this.password, false, function (error) {
 			if (error) {
 				that.log(error);
-				that.log.error("Can't log on to neato cloud. Please check your credentials.");
+				that.log.error("Can't log on to vorwerk cloud. Please check your credentials.");
 				callback();
 			}
 			else {
 				client.getRobots(function (error, robots) {
 					if (error) {
 						that.log(error);
-						that.log.error("Successful login but can't connect to your neato robot.");
+						that.log.error("Successful login but can't connect to your vorwerk robot.");
 						callback();
 					}
 					else {
@@ -118,7 +118,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 		this.informationService = new Service.AccessoryInformation();
 		this.informationService
 		.setCharacteristic(Characteristic.Name, this.robot.name)
-		.setCharacteristic(Characteristic.Manufacturer, "Neato Robotics")
+		.setCharacteristic(Characteristic.Manufacturer, "Vorwerk Deutschland Stiftung & Co. KG")
 		.setCharacteristic(Characteristic.Model, "Coming soon")
 		.setCharacteristic(Characteristic.SerialNumber, this.robot._serial);
 
