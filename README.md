@@ -45,9 +45,11 @@ Add the following information to your config file. Change the values for email a
 
 ### Advanced
 
-The following config contains advanced settings that are disabled when not specified.
+The following config contains advanced optional settings that are off when not specified.
 
-The parameter **refresh** adjusts in what interval (seconds) changes of the robot state will be pushed to homekit. The minimum refresh time is 60 seconds. You need this only when you set up rules based on the robot state and start him outside of homekit (e.g. with the Neato app).
+The parameter **refresh** sets in what interval (seconds) changes of the robot state will be pushed to homekit. The minimum refresh time is 60 seconds. You need this only when you set up rules based on the robot state and start him outside of homekit (e.g. with the Vorwerk app).
+
+The parameter **disabled** accepts a list of switches/sensors that can be disabled in the neato homekit plugin (e.g. dock, dockstate, eco, schedule).
 
 <!-- The parameter **extraCareNavigation** determines if supporting models (currently Neato D3 and D5) should take extra care of your furniture while cleaning. -->
 
@@ -58,6 +60,7 @@ The parameter **refresh** adjusts in what interval (seconds) changes of the robo
 		"email": "YourEmail",
 		"password": "YourPassword",
 		"refresh": "120",
+		"disabled": ["dock", "eco"]
 	}
 ]
 ```
@@ -77,3 +80,5 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 ### 0.1.1
 * (nicoh88) release for npmjs
 
+### 0.1.2
+* (nicoh88) added config parameter to disable switches/sensors
