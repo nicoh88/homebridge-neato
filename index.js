@@ -259,7 +259,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 		let that = this;
 		this.updateRobot(function (error, result) {
 			debug(that.name + ": Is docked: " + that.robot.isDocked);
-			callback(false, that.robot.isDocked);
+			callback(false, that.robot.isDocked ? 1 : 0);
 		});
 	},
 
@@ -302,6 +302,10 @@ VorwerkVacuumRobotAccessory.prototype = {
 		else {
 			debug(this.name + ": Update (online)");
 			this.robot.getState(function (error, result) {
+				if (error) {
+					that.log.error("Error while updating robot state.");
+					that.log.error(error);
+				}
 				that.lastUpdate = new Date();
 				callback();
 			});
@@ -318,8 +322,9 @@ VorwerkVacuumRobotAccessory.prototype = {
 				that.vacuumRobotCleanService.setCharacteristic(Characteristic.On, that.robot.canPause);
 			}
 
-			if (that.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).value !== !that.robot.dockHasBeenSeen) {
-				that.vacuumRobotGoToDockService.setCharacteristic(Characteristic.On, !that.robot.dockHasBeenSeen);
+			// dock switch is on (dock not seen before) and dock has just been seen -> turn switch off
+			if (that.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).value == true && that.robot.dockHasBeenSeen) {
+				that.vacuumRobotGoToDockService.setCharacteristic(Characteristic.On, false);
 			}
 
 			if (that.vacuumRobotScheduleService.getCharacteristic(Characteristic.On).value !== that.robot.isScheduleEnabled) {
@@ -327,7 +332,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 			}
 
 			// no commands here, values can be updated without problems
-			that.vacuumRobotDockStateService.setCharacteristic(Characteristic.OccupancyDetected, that.robot.isDocked);
+			that.vacuumRobotDockStateService.setCharacteristic(Characteristic.OccupancyDetected, that.robot.isDocked ? 1 : 0);
 			that.vacuumRobotBatteryService.setCharacteristic(Characteristic.BatteryLevel, that.robot.charge);
 			that.vacuumRobotBatteryService.setCharacteristic(Characteristic.ChargingState, that.robot.isCharging);
 

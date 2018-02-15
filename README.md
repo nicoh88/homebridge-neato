@@ -82,3 +82,9 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 
 ### 0.1.2
 * (nicoh88) added config parameter to disable switches/sensors
+
+### 0.2.0
+* (nicoh88) fixed compatibility with homebridge 0.4.23 (occupancy sensor not working)
+* (nicoh88) fixed a rare bug where the robot stops after some seconds of cleaning
+* (nicoh88) added errorlog while refreshing robot state
+
