@@ -1,27 +1,31 @@
 {
   "name": "homebridge-vorwerk",
-  "version": "0.2.0",
-  "description": "A Vorwerk Kobold VR200 vacuum robot plugin for homebridge.",
+  "version": "0.3.0",
+  "description": "A Vorwerk Kobold VR200 and VR300 vacuum robot plugin for homebridge.",
+  "author": "nicoh88",
   "license": "MIT",
+  "main": "index.js",
   "keywords": [
     "homebridge-plugin",
     "vorwerk",
     "kobold",
-    "vr200"
+    "vr200",
+    "vr300"
   ],
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
   },
-  "author": {
-    "name": "Nico Hartung"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/nicoh88/homebridge-vorwerk.git"
   },
+  "bugs": {
+    "url": "https://github.com/nicoh88/homebridge-vorwerk/issues"
+  },
+  "homepage": "https://github.com/nicoh88/homebridge-vorwerk#readme",
   "dependencies": {
-    "node-kobold": ">=0.1.2",
+    "node-kobold": ">=0.1.3",
     "debug": "^2.2.0"
   }
 }
