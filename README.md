@@ -101,3 +101,6 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 * Updated node-kobold dependency to 0.1.3
 * Fixed an exception when no robot is associated with the account
 <!-- * Removed extra care navigation option parameter (is now a button)-->
+
+### 0.3.1
+* Fixed cleaning with / without nogoLines

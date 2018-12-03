@@ -194,12 +194,12 @@ VorwerkVacuumRobotAccessory.prototype = {
 					else {
 						let eco = that.vacuumRobotEcoService.getCharacteristic(Characteristic.On).value;
  						//let extraCare = that.vacuumRobotExtraCareService.getCharacteristic(Characteristic.On).value;
+ 						let extraCare = false
  						let nogoLines = that.vacuumRobotNoGoLinesService.getCharacteristic(Characteristic.On).value;
- 						//debug(that.name + ": Start cleaning (eco: " + eco + ", extraCare: " + extraCare + ", nogoLines: " + nogoLines + ")");
- 						debug(that.name + ": Start cleaning (eco: " + eco + ", nogoLines: " + nogoLines + ")");
+ 						debug(that.name + ": Start cleaning (eco: " + eco + ", extraCare: " + extraCare + ", nogoLines: " + nogoLines + ")");
  						that.robot.startCleaning(
  							eco,
- 							//extraCare ? 2 : 1,
+ 							extraCare ? 2 : 1,
  							nogoLines,
  							function (error, result) {
  								if (error) {
