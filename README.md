@@ -44,7 +44,7 @@ Add the following information to your config file. Change the values for email a
 ]
 ```
 
-<img src="https://raw.githubusercontent.com/nicoh88/homebridge-vorwerk/master/vorwerk-kobold-vr300.jpg" style="border:1px solid lightgray" alt="Screenshot Vorwerk Kobold in Apple HomeKit" width="600">
+<img src="https://raw.githubusercontent.com/nicoh88/homebridge-vorwerk/master/vorwerk-kobold-homekit-screenshot.png" style="border:1px solid lightgray" alt="Screenshot Vorwerk Kobold in Apple HomeKit" width="600">
 
 ### Advanced
 
