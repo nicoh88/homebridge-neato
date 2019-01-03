@@ -12,10 +12,13 @@ Feel free to leave any feedback [here](https://github.com/nicoh88/homebridge-vor
 ## Features
 
 - Start and pause cleaning
+- Start and pause spot cleaning
 - Return to dock
 - Toggle schedule
 - Toggle eco mode
 - Toggle nogo lines
+- Toggle 4x4 mode (spot)
+- Toggle repeat mode (spot)
 - Get battery info
 - Get dock info
 - Periodic refresh of robot state
