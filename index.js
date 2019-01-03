@@ -44,7 +44,7 @@ VorwerkVacuumRobotPlatform.prototype = {
 		let that = this;
 		this.robots = this.getRobots(function () {
 			for (var i = 0; i < that.robots.length; i++) {
-				that.log("Found robot #" + (i + 1) + " named \"" + that.robots[i].name + "\" with serial \"" + that.robots[i]._serial + "\"");
+				that.log("getRobots | Found robot #" + (i + 1) + " named \"" + that.robots[i].name + "\" with serial \"" + that.robots[i]._serial + "\"");
 				var robotAccessory = new VorwerkVacuumRobotAccessory(that.robots[i], that);
 				that.accessories.push(robotAccessory);
 			}
@@ -53,30 +53,30 @@ VorwerkVacuumRobotPlatform.prototype = {
 	},
 
 	getRobots: function (callback) {
- 		debug("Loading your robots");
+ 		debug("getRobots | Loading your robots");
 		let client = new kobold.Client();
 		let that = this;
 		client.authorize(this.email, this.password, false, function (error) {
 			if (error) {
 				that.log(error);
-				that.log.error("Can't log on to vorwerk cloud. Please check your credentials.");
+				that.log.error("getRobots | Can't log on to vorwerk cloud. Please check your credentials.");
 				callback();
 			}
 			else {
 				client.getRobots(function (error, robots) {
 					if (error) {
 						that.log(error);
-						that.log.error("Successful login but can't connect to your vorwerk robot.");
+						that.log.error("getRobots | Successful login but can't connect to your vorwerk robot.");
 						callback();
 					}
 					else {
 						if (robots.length === 0) {
-							that.log.error("Successful login but no robots associated with your account.");
+							that.log.error("getRobots | Successful login but no robots associated with your account.");
 							that.robots = [];
-							callback();					
+							callback();
 						}
 						else {
-							debug("Found " + robots.length + " robots");
+							debug("getRobots | Found " + robots.length + " robots");
 							that.robots = robots;
 							callback();
 						}
@@ -97,6 +97,7 @@ function VorwerkVacuumRobotAccessory(robot, platform) {
 	this.lastUpdate = null;
 
 	this.vacuumRobotCleanService = new Service.Switch(this.name + " Clean", "clean");
+	this.vacuumRobotSpotCleanService = new Service.Switch(this.name + " SpotClean", "spotClean");
 	this.vacuumRobotGoToDockService = new Service.Switch(this.name + " Go to Dock", "goToDock");
 	this.vacuumRobotDockStateService = new Service.OccupancySensor(this.name + " Dock", "dockState");
 	this.vacuumRobotEcoService = new Service.Switch(this.name + " Eco Mode", "eco");
@@ -105,7 +106,7 @@ function VorwerkVacuumRobotAccessory(robot, platform) {
 	this.vacuumRobotScheduleService = new Service.Switch(this.name + " Schedule", "schedule");
 	this.vacuumRobotBatteryService = new Service.BatteryService("Battery", "battery");
 
-	this.updateRobotTimer();	
+	this.updateRobotTimer();
 }
 
 
@@ -136,6 +137,9 @@ VorwerkVacuumRobotAccessory.prototype = {
 
 		this.vacuumRobotCleanService.getCharacteristic(Characteristic.On).on('set', this.setClean.bind(this));
 		this.vacuumRobotCleanService.getCharacteristic(Characteristic.On).on('get', this.getClean.bind(this));
+
+		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('set', this.setSpotClean.bind(this));
+		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('get', this.getSpotClean.bind(this));
 
 		this.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).on('set', this.setGoToDock.bind(this));
 		this.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).on('get', this.getGoToDock.bind(this));
@@ -170,6 +174,8 @@ VorwerkVacuumRobotAccessory.prototype = {
  		//	this.services.push(this.vacuumRobotExtraCareService);
  		if (this.hiddenServices.indexOf('schedule') === -1)
  			this.services.push(this.vacuumRobotScheduleService);
+ 		if (this.hiddenServices.indexOf('spot') === -1)
+ 			this.services.push(this.vacuumRobotSpotCleanService);
  		return this.services;
 	},
 
@@ -188,7 +194,7 @@ VorwerkVacuumRobotAccessory.prototype = {
  					}
 
 					if (that.robot.canResume) {
-						debug(that.name + ": Resume cleaning");
+						debug("setClean | " + that.name + ": Resume cleaning");
 						that.robot.resumeCleaning(callback);
 					}
 					else {
@@ -196,7 +202,7 @@ VorwerkVacuumRobotAccessory.prototype = {
  						//let extraCare = that.vacuumRobotExtraCareService.getCharacteristic(Characteristic.On).value;
  						let extraCare = false
  						let nogoLines = that.vacuumRobotNoGoLinesService.getCharacteristic(Characteristic.On).value;
- 						debug(that.name + ": Start cleaning (eco: " + eco + ", extraCare: " + extraCare + ", nogoLines: " + nogoLines + ")");
+ 						debug("setClean | " + that.name + ": Start cleaning (eco: " + eco + ", extraCare: " + extraCare + ", nogoLines: " + nogoLines + ")");
  						that.robot.startCleaning(
  							eco,
  							extraCare ? 2 : 1,
@@ -213,17 +219,78 @@ VorwerkVacuumRobotAccessory.prototype = {
 					}
 				}
 				else {
-					debug(that.name + ": Cant start, maybe already cleaning");
+					debug("setClean | " + that.name + ": Cant start, maybe already cleaning");
 					callback();
 				}
 			}
 			else {
 				if (that.robot.canPause) {
-					debug(that.name + ": Pause cleaning");
+					debug("setClean | " + that.name + ": Pause cleaning");
 					that.robot.pauseCleaning(callback);
 				}
 				else {
-					debug(that.name + ": Already stopped");
+					debug("setClean | " + that.name + ": Already stopped");
+					callback();
+				}
+			}
+		});
+	},
+
+	setSpotClean: function (on, callback) {
+		let that = this;
+		this.updateRobot(function (error, result) {
+			if (on) {
+				if (that.robot.canResume || that.robot.canStart) {
+
+					// start extra update robot timer if refresh is set to "auto"
+ 					if (that.refresh === 'auto') {
+ 						setTimeout(function () {
+ 							clearTimeout(that.timer);
+ 							that.updateRobotTimer();
+ 						}, 60 * 1000);
+ 					}
+
+					if (that.robot.canResume) {
+						debug("setSpotClean | " + that.name + ": Resume spot cleaning");
+						that.robot.resumeCleaning(callback);
+					}
+					else {
+						let eco = that.vacuumRobotEcoService.getCharacteristic(Characteristic.On).value;
+ 						let width = 200;
+ 						let height = 200;
+ 						let repeat = 2;
+ 						//let extraCare = that.vacuumRobotExtraCareService.getCharacteristic(Characteristic.On).value;
+ 						let extraCare = false
+ 						debug("setSpotClean | " + that.name + ": Start spot cleaning (eco: " + eco + ", width: " + width + ", height: " + height + ", repeat: " + repeat + ")");
+ 						that.robot.startSpotCleaning(
+ 							eco,
+ 							width,
+ 							height,
+ 							repeat,
+ 							extraCare ? 2 : 1,
+ 							function (error, result) {
+ 								if (error) {
+ 									that.log.error(error + ": " + result);
+ 									callback(true);
+ 								}
+ 								else {
+ 									callback();
+ 								}
+ 							});
+					}
+				}
+				else {
+					debug("setSpotClean | " + that.name + ": Cant start, maybe already cleaning");
+					callback();
+				}
+			}
+			else {
+				if (that.robot.canPause) {
+					debug("setSpotClean | " + that.name + ": Pause spot cleaning");
+					that.robot.pauseCleaning(callback);
+				}
+				else {
+					debug("setSpotClean | " + that.name + ": Already stopped");
 					callback();
 				}
 			}
@@ -235,7 +302,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 		this.updateRobot(function (error, result) {
 			if (on) {
 				if (that.robot.canPause) {
-					debug(that.name + ": Pause cleaning to go to dock");
+					debug("setGoToDock | " + that.name + ": Pause cleaning to go to dock");
 					that.robot.pauseCleaning(function (error, result) {
 						setTimeout(function () {
 							debug("Go to dock");
@@ -244,11 +311,11 @@ VorwerkVacuumRobotAccessory.prototype = {
 					});
 				}
 				else if (that.robot.canGoToBase) {
-					debug(that.name + ": Go to dock");
+					debug("setGoToDock | " + that.name + ": Go to dock");
 					that.robot.sendToBase(callback);
 				}
 				else {
-					that.log.warn(that.name + ": Can't go to dock at the moment");
+					that.log.warn("setGoToDock | " + that.name + ": Can't go to dock at the moment");
 					callback();
 				}
 			} else {
@@ -258,13 +325,13 @@ VorwerkVacuumRobotAccessory.prototype = {
 	},
 
 	setEco: function (on, callback) {
-		debug(this.name + ": " + (on ? "Enable eco mode" : "Disable eco mode"));
+		debug("setEco | " + this.name + ": " + (on ? "Enable eco mode" : "Disable eco mode"));
 		this.robot.eco = on;
 		callback();
 	},
 
 	setNoGoLines: function (on, callback) {
- 		debug(this.name + ": " + (on ? "Enable nogo lines" : "Disable nogo lines"));
+ 		debug("setEco | " + this.name + ": " + (on ? "Enable nogo lines" : "Disable nogo lines"));
  		this.robot.noGoLines = on;
  		callback();
  	},
@@ -279,11 +346,11 @@ VorwerkVacuumRobotAccessory.prototype = {
 		let that = this;
 		this.updateRobot(function (error, result) {
 			if (on) {
-				debug(that.name + ": Enable schedule");
+				debug("setSchedule | " + that.name + ": Enable schedule");
 				that.robot.enableSchedule(callback);
 			}
 			else {
-				debug(that.name + ": Disable schedule");
+				debug("setSchedule | " + that.name + ": Disable schedule");
 				that.robot.disableSchedule(callback);
 			}
 		});
@@ -292,7 +359,15 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getClean: function (callback) {
 		let that = this;
 		this.updateRobot(function (error, result) {
-			debug(that.name + ": Is cleaning: " + that.robot.canPause);
+			debug("getClean | " + that.name + ": Is cleaning: " + that.robot.canPause);
+			callback(false, that.robot.canPause);
+		});
+	},
+
+	getSpotClean: function (callback) {
+		let that = this;
+		this.updateRobot(function (error, result) {
+			debug("getSpotClean | " + that.name + ": Is cleaning: " + that.robot.canPause);
 			callback(false, that.robot.canPause);
 		});
 	},
@@ -304,7 +379,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getDock: function (callback) {
 		let that = this;
 		this.updateRobot(function () {
-			debug(that.name + ": Is docked: " + that.robot.isDocked);
+			debug("getDock | " + that.name + ": Is docked: " + that.robot.isDocked);
 			callback(false, that.robot.isDocked ? 1 : 0);
 		});
 	},
@@ -312,7 +387,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getEco: function (callback) {
  		let that = this;
  		this.updateRobot(function () {
- 			debug(that.name + ": Is eco: " + that.robot.eco);
+ 			debug("getEco | " + that.name + ": Is eco: " + that.robot.eco);
  			callback(false, that.robot.eco);
  		});
  	},
@@ -320,7 +395,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getNoGoLines: function(callback) {
 		let that = this;
 		this.updateRobot(function () {
- 			debug(that.name + ": Is nogo lines: " + that.robot.noGoLines);
+ 			debug("getNoGoLines | " + that.name + ": Is nogo lines: " + that.robot.noGoLines);
  			callback(false, that.robot.noGoLines ? 1 : 0);
  		});
  	},
@@ -328,7 +403,7 @@ VorwerkVacuumRobotAccessory.prototype = {
  	//getExtraCare: function (callback) {
  	//	let that = this;
  	//	this.updateRobot(function () {
- 	//		debug(that.name + ": Is extra care navigation: " + (that.robot.navigationMode == 2 ? true : false));
+ 	//		debug("getExtraCare | " + that.name + ": Is extra care navigation: " + (that.robot.navigationMode == 2 ? true : false));
  	//		callback(false, that.robot.navigationMode == 2 ? 1 : 0);
  	//	});
  	//},
@@ -336,7 +411,7 @@ VorwerkVacuumRobotAccessory.prototype = {
  	getSchedule: function (callback) {
  		let that = this;
  		this.updateRobot(function () {
- 			debug(that.name + ": Is schedule: " + that.robot.isScheduleEnabled);
+ 			debug("getSchedule | " + that.name + ": Is schedule: " + that.robot.isScheduleEnabled);
 			callback(false, that.robot.isScheduleEnabled);
 		});
 	},
@@ -344,7 +419,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getBatteryLevel: function (callback) {
 		let that = this;
 		this.updateRobot(function () {
-			debug(that.name + ": Battery: " + that.robot.charge + "%");
+			debug("getBatteryLevel | " + that.name + ": Battery: " + that.robot.charge + "%");
 			callback(false, that.robot.charge);
 		});
 	},
@@ -352,7 +427,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 	getBatteryChargingState: function (callback) {
 		let that = this;
 		this.updateRobot(function () {
-			debug(that.name + ": Is charging: " + that.robot.isCharging);
+			debug("getBatteryChargingState | " + that.name + ": Is charging: " + that.robot.isCharging);
 			callback(false, that.robot.isCharging);
 		});
 	},
@@ -363,7 +438,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 			callback();
 		}
 		else {
-			debug(this.name + ": Updating robot state");
+			debug("updateRobot | " + this.name + ": Updating robot state");
 			this.robot.getState(function (error, result) {
 				if (error) {
 					that.log.error(error + ": " + result);
@@ -405,16 +480,16 @@ VorwerkVacuumRobotAccessory.prototype = {
 			// robot is currently cleaning, update if refresh is set to auto or a specific interval
  			if (that.robot.canPause && that.refresh !== 0) {
  				let refreshTime = that.refresh === 'auto' ? 60 : that.refresh
- 				debug("Updating state in background every " + refreshTime + " seconds while cleaning");
- 				that.timer = setTimeout(that.updateRobotTimer.bind(that), refreshTime * 1000);	
+ 				debug("updateRobotTimer | Updating state in background every " + refreshTime + " seconds while cleaning");
+ 				that.timer = setTimeout(that.updateRobotTimer.bind(that), refreshTime * 1000);
 			}
 			// robot is not cleaning, but a specific refresh interval is set
  			else if (that.refresh !== 'auto' && that.refresh !== 0) {
-				debug("Updating state in background every " + that.refresh + " seconds (user setting)");
+				debug("updateRobotTimer | Updating state in background every " + that.refresh + " seconds (user setting)");
 				that.timer = setTimeout(that.updateRobotTimer.bind(that), that.refresh * 1000);
 			}
 			else {
-				debug("Updating state in background disabled");
+				debug("updateRobotTimer | Updating state in background disabled");
 			}
 		});
 	},

@@ -104,3 +104,6 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 
 ### 0.3.1
 * Fixed cleaning with / without nogoLines
+
+### 0.3.2
+* Added support for spot cleaning
