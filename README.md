@@ -51,7 +51,7 @@ Add the following information to your config file. Change the values for email a
 The following config contains advanced optional settings.
 
 The parameter **refresh** sets an interval in seconds that is used to update the robot state in the background. This is only required for automations based on the robot state. The default value is `auto` which means that the update is automatically enabled while cleaning and disabled while not cleaning. You can set a value in seconds e.g. `120` to enable background updates even when the robot is not cleaning. You can also disable background updates completely by setting the value `0`. This might be required if you experience timeouts in the app because you have other home automation apps that are connected to your robot.
-The parameter **disabled** accepts a list of switches/sensors that can be disabled in the neato homekit plugin (e.g. dock, dockstate, eco, schedule).
+The parameter **disabled** accepts a list of switches/sensors that can be disabled in the neato homekit plugin (e.g. dock, dockstate, eco, schedule, spot).
 
 ```json
 "platforms": [
@@ -60,7 +60,7 @@ The parameter **disabled** accepts a list of switches/sensors that can be disabl
 		"email": "YourEmail",
 		"password": "YourPassword",
 		"refresh": "120",
-		"disabled": ["dock", "dockstate", "eco", "nogolines", "schedule"]
+		"disabled": ["dock", "dockstate", "eco", "nogolines", "schedule", "spot"]
 	}
 ]
 ```
@@ -106,4 +106,5 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 * Fixed cleaning with / without nogoLines
 
 ### 0.3.2
-* Added support for spot cleaning
+* Added support for spot cleaning with repeat (2x) and 4x4 mode [#3](https://github.com/nicoh88/homebridge-vorwerk/issues/3)
+  * repeat and 4x4 mode are not persistent, after a reboot of homebridge set it to off/false - use it for spot cleaning in compination with homekit scenes or automations

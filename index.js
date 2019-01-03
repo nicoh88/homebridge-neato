@@ -96,8 +96,13 @@ function VorwerkVacuumRobotAccessory(robot, platform) {
 	this.name = robot.name;
 	this.lastUpdate = null;
 
+	this.tempSpot4x4 = false;
+	this.tempSpotRepeat = false;
+
 	this.vacuumRobotCleanService = new Service.Switch(this.name + " Clean", "clean");
 	this.vacuumRobotSpotCleanService = new Service.Switch(this.name + " SpotClean", "spotClean");
+	this.vacuumRobotSpotRepeatService = new Service.Switch(this.name + " SpotClean Extra Care", "spotExtraCare");
+	this.vacuumRobotSpot4x4Service = new Service.Switch(this.name + " SpotClean 4x4", "spotClean4x4");
 	this.vacuumRobotGoToDockService = new Service.Switch(this.name + " Go to Dock", "goToDock");
 	this.vacuumRobotDockStateService = new Service.OccupancySensor(this.name + " Dock", "dockState");
 	this.vacuumRobotEcoService = new Service.Switch(this.name + " Eco Mode", "eco");
@@ -138,9 +143,6 @@ VorwerkVacuumRobotAccessory.prototype = {
 		this.vacuumRobotCleanService.getCharacteristic(Characteristic.On).on('set', this.setClean.bind(this));
 		this.vacuumRobotCleanService.getCharacteristic(Characteristic.On).on('get', this.getClean.bind(this));
 
-		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('set', this.setSpotClean.bind(this));
-		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('get', this.getSpotClean.bind(this));
-
 		this.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).on('set', this.setGoToDock.bind(this));
 		this.vacuumRobotGoToDockService.getCharacteristic(Characteristic.On).on('get', this.getGoToDock.bind(this));
 
@@ -161,6 +163,16 @@ VorwerkVacuumRobotAccessory.prototype = {
 		this.vacuumRobotBatteryService.getCharacteristic(Characteristic.BatteryLevel).on('get', this.getBatteryLevel.bind(this));
 		this.vacuumRobotBatteryService.getCharacteristic(Characteristic.ChargingState).on('get', this.getBatteryChargingState.bind(this));
 
+		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('set', this.setSpotClean.bind(this));
+		this.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).on('get', this.getSpotClean.bind(this));
+
+		this.vacuumRobotSpot4x4Service.getCharacteristic(Characteristic.On).on('set', this.setSpot4x4.bind(this));
+		this.vacuumRobotSpot4x4Service.getCharacteristic(Characteristic.On).on('get', this.getSpot4x4.bind(this));
+
+		this.vacuumRobotSpotRepeatService.getCharacteristic(Characteristic.On).on('set', this.setSpotRepeat.bind(this));
+		this.vacuumRobotSpotRepeatService.getCharacteristic(Characteristic.On).on('get', this.getSpotRepeat.bind(this));
+
+
 		this.services = [this.informationService, this.vacuumRobotCleanService, this.vacuumRobotBatteryService];
 		if (this.hiddenServices.indexOf('dock') === -1)
  			this.services.push(this.vacuumRobotGoToDockService);
@@ -174,8 +186,11 @@ VorwerkVacuumRobotAccessory.prototype = {
  		//	this.services.push(this.vacuumRobotExtraCareService);
  		if (this.hiddenServices.indexOf('schedule') === -1)
  			this.services.push(this.vacuumRobotScheduleService);
- 		if (this.hiddenServices.indexOf('spot') === -1)
+ 		if (this.hiddenServices.indexOf('spot') === -1) {
  			this.services.push(this.vacuumRobotSpotCleanService);
+ 			this.services.push(this.vacuumRobotSpot4x4Service);
+ 			this.services.push(this.vacuumRobotSpotRepeatService);
+ 		};
  		return this.services;
 	},
 
@@ -200,7 +215,7 @@ VorwerkVacuumRobotAccessory.prototype = {
 					else {
 						let eco = that.vacuumRobotEcoService.getCharacteristic(Characteristic.On).value;
  						//let extraCare = that.vacuumRobotExtraCareService.getCharacteristic(Characteristic.On).value;
- 						let extraCare = false
+ 						let extraCare = false;
  						let nogoLines = that.vacuumRobotNoGoLinesService.getCharacteristic(Characteristic.On).value;
  						debug("setClean | " + that.name + ": Start cleaning (eco: " + eco + ", extraCare: " + extraCare + ", nogoLines: " + nogoLines + ")");
  						that.robot.startCleaning(
@@ -256,17 +271,21 @@ VorwerkVacuumRobotAccessory.prototype = {
 					}
 					else {
 						let eco = that.vacuumRobotEcoService.getCharacteristic(Characteristic.On).value;
- 						let width = 200;
- 						let height = 200;
- 						let repeat = 2;
- 						//let extraCare = that.vacuumRobotExtraCareService.getCharacteristic(Characteristic.On).value;
- 						let extraCare = false
+						if (!that.vacuumRobotSpot4x4Service.getCharacteristic(Characteristic.On).value) {
+							var width = 200;
+ 							var height = 200;
+ 						} else {
+ 							var width = 400;
+ 							var height = 400;
+ 						} 
+ 						let repeat = that.vacuumRobotSpotRepeatService.getCharacteristic(Characteristic.On).value;
+ 						let extraCare = false;
  						debug("setSpotClean | " + that.name + ": Start spot cleaning (eco: " + eco + ", width: " + width + ", height: " + height + ", repeat: " + repeat + ")");
  						that.robot.startSpotCleaning(
  							eco,
  							width,
  							height,
- 							repeat,
+ 							repeat ? 2 : 1,
  							extraCare ? 2 : 1,
  							function (error, result) {
  								if (error) {
@@ -356,6 +375,28 @@ VorwerkVacuumRobotAccessory.prototype = {
 		});
 	},
 
+	setSpotRepeat: function (on, callback) {
+		debug("setSpotRepeat | " + this.name + ": " + (on ? "Enable spot cleaning repeat mode (2x)" : "Disable spot cleaning repeat mode (2x)"));
+		if (on) {
+			this.tempSpotRepeat = true;
+		}
+		else {
+			this.tempSpotRepeat = false;
+		}
+		callback();
+	},
+
+	setSpot4x4: function (on, callback) {
+		debug("setSpot4x4 | " + this.name + ": " + (on ? "Enable spot cleaning 4x4 mode" : "Disable spot cleaning 4x4 mode"));
+		if (on) {
+			this.tempSpot4x4 = true;
+		}
+		else {
+			this.tempSpot4x4 = false;
+		}
+		callback();
+	},
+
 	getClean: function (callback) {
 		let that = this;
 		this.updateRobot(function (error, result) {
@@ -416,6 +457,18 @@ VorwerkVacuumRobotAccessory.prototype = {
 		});
 	},
 
+ 	getSpotRepeat: function (callback) {
+ 		let that = this;
+			debug("getSpotRepeat | " + that.name + ": Is spot cleaning repeat: " + that.tempSpotRepeat);
+			callback(false, that.tempSpotRepeat);
+	},
+
+ 	getSpot4x4: function (callback) {
+ 		let that = this;
+ 			debug("getSpot4x4 | " + that.name + ": Is spot cleaning 4x4: " + that.tempSpot4x4);
+			callback(false, that.tempSpot4x4);
+	},
+
 	getBatteryLevel: function (callback) {
 		let that = this;
 		this.updateRobot(function () {
@@ -456,6 +509,9 @@ VorwerkVacuumRobotAccessory.prototype = {
 			// only update these values if the state is different from the current one, otherwise we might accidentally start an action
 			if (that.vacuumRobotCleanService.getCharacteristic(Characteristic.On).value !== that.robot.canPause) {
 				that.vacuumRobotCleanService.setCharacteristic(Characteristic.On, that.robot.canPause);
+			}
+			if (that.vacuumRobotSpotCleanService.getCharacteristic(Characteristic.On).value !== that.robot.canPause) {
+				that.vacuumRobotSpotCleanService.setCharacteristic(Characteristic.On, that.robot.canPause);
 			}
 
 			// dock switch is on (dock not seen before) and dock has just been seen -> turn switch off
