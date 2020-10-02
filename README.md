@@ -73,7 +73,7 @@ curl -X "POST" "https://mykobold.eu.auth0.com/passwordless/start" \
 ```
 ==== wait for the email to be received ====
 
-```
+```bash
 # this will generate a token using the numbers you received via email
 # replace the value of otp 123456 with the value you received from the email
 curl -X "POST" "https://mykobold.eu.auth0.com/oauth/token" \
