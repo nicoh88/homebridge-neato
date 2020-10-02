@@ -57,7 +57,7 @@ VorwerkVacuumRobotPlatform.prototype = {
  		debug("getRobots | Loading your robots");
 		let client = new kobold.Client();
 		let that = this;
-		let callback = function (error) {
+		let loginCallback = function (error) {
 			if (error) {
 				that.log(error);
 				that.log.error("getRobots | Can't log on to vorwerk cloud. Please check your credentials.");
@@ -89,9 +89,9 @@ VorwerkVacuumRobotPlatform.prototype = {
 		// use the new oauth2 mechanism
 		if (this.token) {
 			client.setToken(this.token);
-			callback();
+			loginCallback();
 		} else {
-			client.authorize(this.email, this.password, false, callback);
+			client.authorize(this.email, this.password, false, loginCallback);
 		}
 	}
 }
