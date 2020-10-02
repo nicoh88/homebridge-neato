@@ -58,6 +58,44 @@ Add the following information to your config file. Change the values for email a
 ]
 ```
 
+You can get a token using the following two curl commands:
+
+```bash
+# This will trigger the email sending
+curl -X "POST" "https://mykobold.eu.auth0.com/passwordless/start" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "send": "code",
+  "email": "ENTER_YOUR_EMAIL_HERE",
+  "client_id": "KY4YbVAvtgB7lp8vIbWQ7zLk3hssZlhR",
+  "connection": "email"
+}'
+```
+==== wait for the email to be received ====
+
+```
+# this will generate a token using the numbers you received via email
+# replace the value of otp 123456 with the value you received from the email
+curl -X "POST" "https://mykobold.eu.auth0.com/oauth/token" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "prompt": "login",
+  "grant_type": "http://auth0.com/oauth/grant-type/passwordless/otp",
+  "scope": "openid email profile read:current_user",
+  "locale": "en",
+  "otp": "123456",
+  "source": "vorwerk_auth0",
+  "platform": "ios",
+  "audience": "https://mykobold.eu.auth0.com/userinfo",
+  "username": "ENTER_YOUR_EMAIL_HERE",
+  "client_id": "KY4YbVAvtgB7lp8vIbWQ7zLk3hssZlhR",
+  "realm": "email",
+  "country_code": "DE"
+}'
+```
+
+From the output, you want to copy the `id_token` value.
+
 <img src="https://raw.githubusercontent.com/nicoh88/homebridge-vorwerk/master/vorwerk-kobold-homekit-screenshot.png" style="border:1px solid lightgray" alt="Screenshot Vorwerk Kobold in Apple HomeKit" width="600">
 
 ### Advanced
