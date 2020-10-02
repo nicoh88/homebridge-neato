@@ -35,7 +35,7 @@ Feel free to leave any feedback [here](https://github.com/nicoh88/homebridge-vor
 
 Add the following information to your config file. Change the values for email and password.
 
-### Simple
+### Simple (Using the old username/password method, unsupported by MyKoboldApp)
 
 ```json
 "platforms": [
@@ -43,6 +43,17 @@ Add the following information to your config file. Change the values for email a
 		"platform": "VorwerkVacuumRobot",
 		"email": "YourEmail",
 		"password": "YourPassword"
+	}
+]
+
+```
+### Simple (Supported by MyKoboldApp)
+
+```json
+"platforms": [
+	{
+		"platform": "VorwerkVacuumRobot",
+		"token": "YourToken"
 	}
 ]
 ```
@@ -60,8 +71,7 @@ The parameter **disabled** accepts a list of switches/sensors that can be disabl
 "platforms": [
 	{
 		"platform": "VorwerkVacuumRobot",
-		"email": "YourEmail",
-		"password": "YourPassword",
+		"token": "YourToken",
 		"refresh": "120",
 		"disabled": ["dock", "dockstate", "eco", "nogolines", "schedule", "spot"]
 	}
@@ -111,3 +121,6 @@ If you have another connected vorwerk robot, please [tell me](https://github.com
 ### 0.3.2
 * Added support for spot cleaning with repeat (2x) and 4x4 mode [#3](https://github.com/nicoh88/homebridge-vorwerk/issues/3)
   * repeat and 4x4 mode are not persistent, after a reboot of homebridge set it to off/false - use it for spot cleaning in compination with homekit scenes or automations
+
+### 0.4.0
+* Add oauth mechanism to support the MyKobold app
