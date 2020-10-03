@@ -1,7 +1,7 @@
 "use strict";
 var inherits = require('util').inherits,
 	debug = require('debug')('homebridge-vorwerk'),
-	kobold = require('node-kobold'),
+	kobold = require('node-kobold-oauth'),
 
 	Service,
 	Characteristic
@@ -17,6 +17,7 @@ function VorwerkVacuumRobotPlatform(log, config) {
 	this.serial = "1-3-3-7";
 	this.email = config['email'];
 	this.password = config['password'];
+	this.token = config['token'];
 	this.hiddenServices = ('disabled' in config ? config['disabled'] : '');
 
 	// this.careNavigation = ('extraCareNavigation' in config && config['extraCareNavigation'] ? 2 : 1);
@@ -56,7 +57,7 @@ VorwerkVacuumRobotPlatform.prototype = {
  		debug("getRobots | Loading your robots");
 		let client = new kobold.Client();
 		let that = this;
-		client.authorize(this.email, this.password, false, function (error) {
+		let loginCallback = function (error) {
 			if (error) {
 				that.log(error);
 				that.log.error("getRobots | Can't log on to vorwerk cloud. Please check your credentials.");
@@ -83,7 +84,15 @@ VorwerkVacuumRobotPlatform.prototype = {
 					}
 				});
 			}
-		});
+		}
+
+		// use the new oauth2 mechanism
+		if (this.token) {
+			client.setToken(this.token);
+			loginCallback();
+		} else {
+			client.authorize(this.email, this.password, false, loginCallback);
+		}
 	}
 }
 
