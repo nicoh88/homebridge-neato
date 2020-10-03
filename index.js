@@ -1,7 +1,7 @@
 "use strict";
 var inherits = require('util').inherits,
 	debug = require('debug')('homebridge-vorwerk'),
-	kobold = require('node-kobold-oauth'),
+	kobold = require('node-kobold'),
 
 	Service,
 	Characteristic

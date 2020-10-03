@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/nicoh88/homebridge-vorwerk#readme",
   "dependencies": {
-    "node-kobold-oauth": ">=0.2.0",
+    "node-kobold": ">=0.2.0",
     "debug": "^2.2.0"
   }
 }
